@@ -1,8 +1,10 @@
 ﻿using SqlBulkTools.Enumeration;
+using SqlBulkTools.NetStandard.DataTableOperations;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
+using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -60,6 +62,22 @@ namespace SqlBulkTools
                 throw new NullReferenceException("MatchTargetOn column name can't be null.");
 
             _matchTargetOn.Add(propertyName);
+
+            return this;
+        }
+
+        /// <summary>
+        /// At least one MatchTargetOn is required for correct configuration. MatchTargetOn is the matching clause for evaluating
+        /// each row in table. This is usally set to the unique identifier in the table (e.g. Id). Multiple MatchTargetOn members are allowed
+        /// for matching composite relationships.
+        /// </summary>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        public BulkInsertOrUpdate<T> MatchTargetOn(string columnName) {
+            if (columnName == null)
+                throw new NullReferenceException("MatchTargetOn column name can't be null.");
+
+            _matchTargetOn.Add(columnName);
 
             return this;
         }
@@ -221,8 +239,15 @@ namespace SqlBulkTools
 
             base.MatchTargetCheck();
 
-            DataTable dt = BulkOperationsHelper.CreateDataTable<T>(_propertyInfoList, _columns, _customColumnMappings, _ordinalDic, _matchTargetOn, _outputIdentity);
-            dt = BulkOperationsHelper.ConvertListToDataTable(_propertyInfoList, dt, _list, _columns, _ordinalDic, _outputIdentityDic);
+            DataTable dt = null;
+
+            if (typeof(T).IsInstanceOfType(typeof(IDynamicMetaObjectProvider))) {
+                dt = _list.ToDataTable("Dynamic");
+            } else {
+                dt = BulkOperationsHelper.CreateDataTable<T>(_propertyInfoList, _columns, _customColumnMappings, _ordinalDic, _matchTargetOn, _outputIdentity);
+                dt = BulkOperationsHelper.ConvertListToDataTable(_propertyInfoList, dt, _list, _columns, _ordinalDic, _outputIdentityDic);
+            }
+            
 
             // Must be after ToDataTable is called.
             BulkOperationsHelper.DoColumnMappings(_customColumnMappings, _columns, _matchTargetOn);

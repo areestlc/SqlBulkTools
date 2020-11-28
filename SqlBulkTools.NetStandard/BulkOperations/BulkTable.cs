@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -92,7 +93,16 @@ namespace SqlBulkTools.BulkCopy
         /// <returns></returns>
         public BulkAddColumnList<T> AddAllColumns()
         {
-            Columns = BulkOperationsHelper.GetAllValueTypeAndStringColumns(_propertyInfoList, typeof(T));
+            if (typeof(T).IsInstanceOfType(typeof(IDynamicMetaObjectProvider))) {
+                var firstElement = _list.FirstOrDefault();
+                if (firstElement == null) throw new Exception("Collection is empty");
+
+                if (firstElement is IDictionary<string, object> dict) {
+                    Columns = new HashSet<string>(dict.Keys);
+                }
+            } else {
+                Columns = BulkOperationsHelper.GetAllValueTypeAndStringColumns(_propertyInfoList, typeof(T));
+            }
             return new BulkAddColumnList<T>(bulk, _list, _tableName, Columns, CustomColumnMappings, _schema, _bulkCopySettings, _propertyInfoList);
         }
 
