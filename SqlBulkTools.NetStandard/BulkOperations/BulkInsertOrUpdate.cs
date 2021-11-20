@@ -242,7 +242,7 @@ namespace SqlBulkTools
             DataTable dt = null;
 
             if (typeof(T).IsInstanceOfType(typeof(IDynamicMetaObjectProvider))) {
-                dt = _list.ToDataTable("Dynamic");
+                dt = _list.ToDataTable(_columns, "Dynamic");
             } else {
                 dt = BulkOperationsHelper.CreateDataTable<T>(_propertyInfoList, _columns, _customColumnMappings, _ordinalDic, _matchTargetOn, _outputIdentity);
                 dt = BulkOperationsHelper.ConvertListToDataTable(_propertyInfoList, dt, _list, _columns, _ordinalDic, _outputIdentityDic);

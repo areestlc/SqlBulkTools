@@ -81,6 +81,23 @@ namespace SqlBulkTools
         }
 
         /// <summary>
+        /// At least one MatchTargetOn is required for correct configuration. MatchTargetOn is the matching clause for evaluating
+        /// each row in table. This is usally set to the unique identifier in the table (e.g. Id). Multiple MatchTargetOn members are allowed
+        /// for matching composite relationships.
+        /// </summary>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        public BulkDelete<T> MatchTargetOn(string columnName)
+        {
+            if (columnName == null)
+                throw new NullReferenceException("MatchTargetOn column name can't be null.");
+
+            _matchTargetOn.Add(columnName);
+
+            return this;
+        }
+
+        /// <summary>
         /// Sets the table hint to be used in the merge query. HOLDLOCk is the default that will be used if one is not set.
         /// </summary>
         /// <param name="tableHint"></param>

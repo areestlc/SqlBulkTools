@@ -57,12 +57,23 @@ namespace SqlBulkTools
         public BulkAddColumnList<T> RemoveColumn(Expression<Func<T, object>> columnName)
         {
             var propertyName = BulkOperationsHelper.GetPropertyName(columnName);
-            if (_columns.Contains(propertyName))
-                _columns.Remove(propertyName);
+            RemoveColumn(propertyName);
+            return this;
+        }
 
-            else           
-                throw new SqlBulkToolsException("Could not remove the column with name " 
-                    + columnName +  
+        /// <summary>
+        /// Removes a column (string) that you want to be excluded. 
+        /// </summary>
+        /// <param name="columnName"></param>
+        /// <returns></returns>
+        /// <exception cref="SqlBulkToolsException"></exception>
+        public BulkAddColumnList<T> RemoveColumn(string columnName) {
+            if (_columns.Contains(columnName))
+                _columns.Remove(columnName);
+
+            else
+                throw new SqlBulkToolsException("Could not remove the column with name "
+                    + columnName +
                     ". This could be because it's not a value or string type and therefore not included.");
 
             return this;
